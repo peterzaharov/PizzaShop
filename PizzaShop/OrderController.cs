@@ -1,16 +1,20 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using PizzaShop.Model;
 
-namespace PizzaShop.Controllers
+namespace PizzaShop
 {
     [Route("orders")]
     [ApiController]
+
     public class OrdersController : Controller
     {
-        private readonly PizzaShopContext _db;
+        private readonly PizzaStoreContext _db;
 
-        public OrdersController(PizzaShopContext db)
+        public OrdersController(PizzaStoreContext db)
         {
             _db = db;
         }
@@ -19,29 +23,12 @@ namespace PizzaShop.Controllers
         public async Task<ActionResult<List<OrderWithStatus>>> GetOrders()
         {
             var orders = await _db.Orders
-             .Include(o => o.Pizzas).ThenInclude(p => p.Special)
-             .Include(o => o.Pizzas).ThenInclude(p => p.Toppings)!.ThenInclude(t => t.Topping)
-             .OrderByDescending(o => o.CreatedTime)
-             .ToListAsync();
-
-            return orders.Select(o => OrderWithStatus.FromOrder(o)).ToList();
-        }
-
-        [HttpGet("{orderId}")]
-        public async Task<ActionResult<OrderWithStatus>> GetOrderWithStatus(int orderId)
-        {
-            var order = await _db.Orders
-                .Where(o => o.OrderId == orderId)
                 .Include(o => o.Pizzas).ThenInclude(p => p.Special)
                 .Include(o => o.Pizzas).ThenInclude(p => p.Toppings).ThenInclude(t => t.Topping)
-                .SingleOrDefaultAsync();
+                .OrderByDescending(o => o.CreatedTime)
+                .ToListAsync();
 
-            if (order == null)
-            {
-                return NotFound();
-            }
-
-            return OrderWithStatus.FromOrder(order);
+            return orders.Select(o => OrderWithStatus.FromOrder(o)).ToList();
         }
 
         [HttpPost]
@@ -54,7 +41,7 @@ namespace PizzaShop.Controllers
             // new specials and toppings
             foreach (var pizza in order.Pizzas)
             {
-                pizza.SpecialId = pizza.Special!.Id;
+                pizza.SpecialId = pizza.Special.Id;
                 pizza.Special = null;
             }
 
@@ -62,6 +49,23 @@ namespace PizzaShop.Controllers
             await _db.SaveChangesAsync();
 
             return order.OrderId;
+        }
+
+        [HttpGet("{orderId}")]
+        public async Task<ActionResult<OrderWithStatus>> GetOrderWithStatus(int orderId)
+        {
+            var order = await _db.Orders
+                .Where(o => o.OrderId == orderId)
+                .Include(o => o.Pizzas).ThenInclude(p => p.Special)
+                .Include(o => o.Pizzas).ThenInclude(p => p.Toppings).ThenInclude(t => t.Topping)
+                .SingleOrDefaultAsync();
+        
+            if (order == null)
+            {
+                return NotFound();
+            }
+        
+            return OrderWithStatus.FromOrder(order);
         }
     }
 }

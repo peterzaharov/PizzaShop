@@ -1,9 +1,9 @@
-﻿@foreach (var pizza in Order!.Pizzas)
+@foreach (var pizza in Order.Pizzas)
 {
     <p>
         <strong>
             @(pizza.Size)"
-            @pizza.Special?.Name
+            @pizza.Special.Name
             (£@pizza.GetFormattedTotalPrice())
         </strong>
     </p>
@@ -17,5 +17,5 @@
 </p>
 
 @code {
-    [Parameter] public Order? Order { get; set; }
+    [Parameter] public Order Order { get; set; }
 }

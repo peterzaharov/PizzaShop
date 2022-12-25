@@ -1,7 +1,6 @@
 ﻿@page "/myorders"
 @inject HttpClient HttpClient
 @inject NavigationManager NavigationManager
-@layout MainLayout
 
 <div class="main">
     @if (ordersWithStatus == null)
@@ -20,11 +19,11 @@
             {
                 <div class="list-group-item">
                     <div class="col">
-                        <h5>@item.Order?.CreatedTime.ToLongDateString()</h5>
+                        <h5>@item.Order.CreatedTime.ToLongDateString()</h5>
                         Items:
-                        <strong>@item.Order?.Pizzas.Count()</strong>;
+                        <strong>@item.Order.Pizzas.Count()</strong>;
                         Total price:
-                        <strong>£@item.Order?.GetFormattedTotalPrice()</strong>
+                        <strong>£@item.Order.GetFormattedTotalPrice()</strong>
                     </div>
                     <div class="col">
                         Status: <strong>@item.StatusText</strong>
@@ -32,7 +31,7 @@
                     @if (@item.StatusText != "Delivered")
                     {
                         <div class="col flex-grow-0">
-                            <a href="myorders/@item.Order?.OrderId" class="btn btn-success">
+                            <a href="myorders/@item.Order.OrderId" class="btn btn-success">
                                 Track &gt;
                             </a>
                         </div>
@@ -48,7 +47,6 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        ordersWithStatus = await HttpClient.GetFromJsonAsync<List<OrderWithStatus>>(
-            $"{NavigationManager.BaseUri}orders");
+      ordersWithStatus = await HttpClient.GetFromJsonAsync<List<OrderWithStatus>>(NavigationManager.BaseUri + "orders");
     }
 }
