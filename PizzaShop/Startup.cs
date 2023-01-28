@@ -20,11 +20,13 @@ namespace PizzaShop
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            var connectionString = Configuration.GetConnectionString("PizzaShopDatabase");
+
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddHttpClient();
             services.AddDbContext<PizzaStoreContext>(options => 
-                options.UseSqlite("Data Source=pizza.db"));
+                options.UseNpgsql(connectionString));
             services.AddScoped<OrderState>();
         }
 
